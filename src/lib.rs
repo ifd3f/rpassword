@@ -63,7 +63,9 @@ mod unix {
     use std::mem;
     use std::os::unix::io::AsRawFd;
 
-    struct HiddenInput {
+    /// When active, hides the echo-back of input on the given file descriptor. When dropped,
+    /// resets to the original state.
+    pub struct HiddenInput {
         fd: i32,
         term_orig: termios,
     }
@@ -152,7 +154,9 @@ mod windows {
         GetConsoleMode, SetConsoleMode, CONSOLE_MODE, ENABLE_LINE_INPUT, ENABLE_PROCESSED_INPUT,
     };
 
-    struct HiddenInput {
+    /// When active, hides the echo-back of input on the given handle. When dropped,
+    /// resets to the original state.
+    pub struct HiddenInput {
         mode: u32,
         handle: HANDLE,
     }
@@ -232,11 +236,11 @@ mod windows {
 }
 
 #[cfg(target_family = "unix")]
-pub use unix::read_password;
+pub use unix::{HiddenInput, read_password};
 #[cfg(target_family = "wasm")]
 pub use wasm::read_password;
 #[cfg(target_family = "windows")]
-pub use windows::read_password;
+pub use windows::{HiddenInput, read_password};
 
 /// Reads a password from `impl BufRead`
 pub fn read_password_from_bufread(reader: &mut impl BufRead) -> std::io::Result<String> {
